@@ -1,0 +1,48 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local hrp = character:WaitForChild("HumanoidRootPart")
+
+-- Noclip character body
+for _, part in pairs(character:GetDescendants()) do
+	if part:IsA("BasePart") then
+		part.CanCollide = false
+	end
+end
+
+-- Create box part
+local box = Instance.new("Part")
+box.Name = "HopBox"
+box.Size = Vector3.new(30, 30, 30)
+box.Color = Color3.fromRGB(255, 255, 0)
+box.Transparency = 1 -- invisible
+box.CanCollide = true
+box.Anchored = false
+box.Massless = true
+box.Parent = character
+
+-- Weld box to torso
+local weld = Instance.new("WeldConstraint")
+weld.Part0 = hrp
+weld.Part1 = box
+weld.Parent = box
+
+box.CFrame = hrp.CFrame
+
+-- Prevent falling states
+humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
+humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+
+-- Hop settings
+humanoid.JumpPower = 70
+humanoid.UseJumpPower = true
+
+-- Constant hop loop (no physics forces)
+RunService.Heartbeat:Connect(function()
+	if humanoid.FloorMaterial ~= Enum.Material.Air then
+		humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+	end
+end)
