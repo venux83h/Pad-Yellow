@@ -1,53 +1,42 @@
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local hrp = character:WaitForChild("HumanoidRootPart")
 
--- Create the support box FIRST
+-- Create box
 local box = Instance.new("Part")
-box.Name = "HopBox"
+box.Name = "SupportBox"
 box.Size = Vector3.new(20, 20, 20)
 box.Color = Color3.fromRGB(255, 255, 0)
-box.Transparency = 1 -- invisible
-box.Anchored = false
+box.Transparency = 0.3 -- CHANGE TO 1 IF YOU WANT INVISIBLE
 box.CanCollide = true
+box.Anchored = false
 box.Massless = true
 box.Parent = character
 
--- Position box UNDER the character
-box.CFrame = hrp.CFrame * CFrame.new(0, -10, 0)
+-- Position under feet
+box.CFrame = hrp.CFrame * CFrame.new(0, -12, 0)
 
--- Weld box to HRP
+-- Weld to HRP
 local weld = Instance.new("WeldConstraint")
 weld.Part0 = hrp
 weld.Part1 = box
 weld.Parent = box
 
--- Noclip character body EXCEPT box
+-- Noclip body BUT keep movement
 for _, part in pairs(character:GetDescendants()) do
 	if part:IsA("BasePart") and part ~= box then
 		part.CanCollide = false
 	end
 end
 
--- Prevent falling states
-humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
-humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+-- NORMAL movement & jumping
+humanoid.UseJumpPower = true
+humanoid.JumpPower = 50
+humanoid.WalkSpeed = 16
 
--- Keep humanoid alive
+-- Safety: prevent death
 humanoid.BreakJointsOnDeath = false
 humanoid.Health = humanoid.MaxHealth
-
--- Hop loop (no forces)
-humanoid.JumpPower = 60
-humanoid.UseJumpPower = true
-
-RunService.Heartbeat:Connect(function()
-	if humanoid.FloorMaterial ~= Enum.Material.Air then
-		humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-	end
-end)
